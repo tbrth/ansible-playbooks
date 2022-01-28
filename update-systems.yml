@@ -1,0 +1,43 @@
+- name: Update all packages to their latest version
+  hosts: all
+
+  tasks:
+    - name: Update all packages on hosts with apt package manager
+      become: yes
+      apt:
+        name: "*"
+        state: latest
+      register: apt_output
+      when: ansible_pkg_mgr == "apt"
+
+    - name: Update all packages on hosts with dnf package manager
+      become: yes
+      dnf:
+        name: "*"
+        state: latest
+      register: dnf_output
+      when: ansible_pkg_mgr == "dnf"
+
+    - name: Update all packages on hosts with apk package manager
+      become: yes
+      apk:
+        available: yes
+        upgrade: yes
+        update_cache: yes
+      register: apk_output
+      when: ansible_pkg_mgr == "apk"
+
+    - name: APT Results
+      debug:
+        msg: "{{ apt_output.stdout_lines }}"
+      when: apt_output.stdout_lines is defined
+
+    - name: DNF Results
+      debug:
+        msg: "{{ dnf_output.stdout_lines }}"
+      when: dnf_output.stdout_lines is defined
+
+    - name: APK Results
+      debug:
+        msg: "{{ apk_output.stdout_lines }}"
+      when: apk_output.stdout_lines is defined
